@@ -1,5 +1,6 @@
 package org.example.expert.domain.todo.service;
 
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.example.expert.client.WeatherClient;
 import org.example.expert.domain.common.dto.AuthUser;
@@ -28,10 +29,6 @@ public class TodoService {
         User user = User.fromAuthUser(authUser);
 
         String weather = weatherClient.getTodayWeather();
-        System.out.println("nickname " + authUser.getNickname());
-        System.out.println("authUserROle " + authUser.getUserRole());
-        System.out.println("Id  " + authUser.getId());
-        System.out.println("email " + authUser.getEmail());
 
         Todo newTodo = new Todo(
                 todoSaveRequest.getTitle(),
@@ -51,10 +48,16 @@ public class TodoService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TodoResponse> getTodos(int page, int size) {
+    public Page<TodoResponse> getTodos(
+            final String weather,
+            final LocalDateTime startDate,
+            final LocalDateTime endDate,
+            int page,
+            int size
+    ) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Todo> todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
+        Page<Todo> todos = todoRepository.findByTodoByFilter(weather, startDate, endDate, pageable);
 
         return todos.map(todo -> new TodoResponse(
                 todo.getId(),
