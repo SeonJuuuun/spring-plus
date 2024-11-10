@@ -28,6 +28,10 @@ public class TodoService {
         User user = User.fromAuthUser(authUser);
 
         String weather = weatherClient.getTodayWeather();
+        System.out.println("nickname " + authUser.getNickname());
+        System.out.println("authUserROle " + authUser.getUserRole());
+        System.out.println("Id  " + authUser.getId());
+        System.out.println("email " + authUser.getEmail());
 
         Todo newTodo = new Todo(
                 todoSaveRequest.getTitle(),
