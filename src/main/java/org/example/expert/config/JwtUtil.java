@@ -1,20 +1,23 @@
 package org.example.expert.config;
 
+
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
-import org.example.expert.domain.common.exception.ServerException;
-import org.example.expert.domain.user.enums.UserRole;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+import lombok.extern.slf4j.Slf4j;
+import org.example.expert.domain.common.dto.AuthUser;
+import org.example.expert.domain.common.exception.ServerException;
+import org.example.expert.domain.user.entity.User;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Slf4j(topic = "JwtUtil")
 @Component
@@ -34,18 +37,16 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    public String createToken(Long userId, String email, String nickname, UserRole userRole) {
+    public String createToken(final AuthUser authUser) {
         Date date = new Date();
 
         return BEARER_PREFIX +
                 Jwts.builder()
-                        .setSubject(String.valueOf(userId))
-                        .claim("email", email)
-                        .claim("nickname", nickname)
-                        .claim("userRole", userRole)
+                        .claim("id", authUser.getId())
+                        .claim("role", authUser.getRole())
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME))
-                        .setIssuedAt(date) // 발급일
-                        .signWith(key, signatureAlgorithm) // 암호화 알고리즘
+                        .setIssuedAt(date)
+                        .signWith(key, signatureAlgorithm)
                         .compact();
     }
 
@@ -62,5 +63,27 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public AuthUser validateToken(String token) throws JwtException {
+        try {
+            Claims claims = extractClaims(token);
+
+            Long id = claims.get("id", Long.class);
+            System.out.println(id);
+            String role = claims.get("role", String.class);
+            System.out.println(role);
+
+            User user = new User(id, role);
+
+            return new AuthUser(user);
+
+        } catch (ExpiredJwtException e) {
+            log.error("Expired JWT token, 만료된 JWT 토큰 입니다.", e);
+            throw e; // 만료된 경우 예외 던짐
+        } catch (JwtException e) {
+            log.error("JWT 검증 실패, 유효하지 않은 토큰 입니다.", e);
+            throw new JwtException("유효하지 않은 JWT 토큰입니다.", e); // 서명 오류 등 다른 오류 처리
+        }
     }
 }

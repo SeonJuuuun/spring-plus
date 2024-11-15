@@ -26,15 +26,14 @@ public class TodoService {
     private final WeatherClient weatherClient;
 
     public TodoSaveResponse saveTodo(AuthUser authUser, TodoSaveRequest todoSaveRequest) {
-        User user = User.fromAuthUser(authUser);
-
+        System.out.println(authUser.user().getNickname());
         String weather = weatherClient.getTodayWeather();
 
         Todo newTodo = new Todo(
                 todoSaveRequest.getTitle(),
                 todoSaveRequest.getContents(),
                 weather,
-                user
+                authUser.user()
         );
         Todo savedTodo = todoRepository.save(newTodo);
 
@@ -43,7 +42,7 @@ public class TodoService {
                 savedTodo.getTitle(),
                 savedTodo.getContents(),
                 weather,
-                new UserResponse(user.getId(), user.getEmail())
+                new UserResponse(authUser.getId(), authUser.getEmail())
         );
     }
 
