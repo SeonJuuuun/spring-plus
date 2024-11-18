@@ -43,6 +43,7 @@ public class JwtUtil {
         return BEARER_PREFIX +
                 Jwts.builder()
                         .claim("id", authUser.getId())
+                        .claim("email", authUser.getEmail())
                         .claim("role", authUser.getRole())
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME))
                         .setIssuedAt(date)
@@ -70,11 +71,10 @@ public class JwtUtil {
             Claims claims = extractClaims(token);
 
             Long id = claims.get("id", Long.class);
-            System.out.println(id);
+            String email = claims.get("email", String.class);
             String role = claims.get("role", String.class);
-            System.out.println(role);
 
-            User user = new User(id, role);
+            User user = new User(id, email, role);
 
             return new AuthUser(user);
 

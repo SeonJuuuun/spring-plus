@@ -9,6 +9,7 @@ import org.example.expert.domain.todo.dto.request.TodoSaveRequest;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
 import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
 import org.example.expert.domain.todo.entity.Todo;
+import org.example.expert.domain.todo.entity.dto.TodoSearchResponse;
 import org.example.expert.domain.todo.repository.TodoRepository;
 import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.entity.User;
@@ -85,5 +86,16 @@ public class TodoService {
                 todo.getCreatedAt(),
                 todo.getModifiedAt()
         );
+    }
+
+    public Page<TodoSearchResponse> searchTodo(
+            final String title,
+            final LocalDateTime startDate,
+            final LocalDateTime endDate,
+            final String nickname,
+            final int page,
+            final int limit
+    ) {
+        return todoRepository.findByFilter(title, startDate, endDate, nickname, PageRequest.of(page, limit));
     }
 }

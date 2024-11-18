@@ -33,8 +33,9 @@ public class User extends Timestamped {
         this.userRole = userRole;
     }
 
-    public User(final Long id, final String role) {
+    public User(final Long id, final String email, final String role) {
         this.id = id;
+        this.email = email;
         this.userRole = UserRole.of(role);
     }
 
