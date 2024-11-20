@@ -9,7 +9,7 @@ import org.example.expert.domain.user.enums.UserRole;
 @Getter
 @Entity
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "users", indexes = @Index(name = "idx_nickname", columnList = "nickname"))
 public class User extends Timestamped {
 
     @Id
@@ -37,6 +37,10 @@ public class User extends Timestamped {
         this.id = id;
         this.email = email;
         this.userRole = UserRole.of(role);
+    }
+
+    public User(final String nickname) {
+        this.nickname = nickname;
     }
 
     public void changePassword(String password) {
