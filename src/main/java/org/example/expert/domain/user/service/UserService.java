@@ -56,28 +56,28 @@ public class UserService {
         }
     }
 
-    public UserSearchResponse searchNickname(final UserSearchRequest userSearchRequest) {
-        final User user = userRepository.findByNickname(userSearchRequest.nickname())
-                .orElseThrow(() -> new InvalidRequestException("닉네임이 유효하지 않습니다."));
-
-        return UserSearchResponse.from(user.getNickname());
-    }
-
 //    public UserSearchResponse searchNickname(final UserSearchRequest userSearchRequest) {
-//        final String nickname = userSearchRequest.nickname();
-//        final String redisKey = REDIS_KEY_PREFIX + nickname;
-//
-//        final UserSearchResponse cachedResponse = (UserSearchResponse) redisTemplate.opsForValue().get(redisKey);
-//        if (cachedResponse != null) {
-//            return cachedResponse;
-//        }
-//
-//        final User user = userRepository.findByNickname(nickname)
+//        final User user = userRepository.findByNickname(userSearchRequest.nickname())
 //                .orElseThrow(() -> new InvalidRequestException("닉네임이 유효하지 않습니다."));
 //
-//        final UserSearchResponse response = UserSearchResponse.from(user.getNickname());
-//        redisTemplate.opsForValue().set(redisKey, response, 10, TimeUnit.MINUTES);
-//
-//        return response;
+//        return UserSearchResponse.from(user.getNickname());
 //    }
+
+    public UserSearchResponse searchNickname(final UserSearchRequest userSearchRequest) {
+        final String nickname = userSearchRequest.nickname();
+        final String redisKey = REDIS_KEY_PREFIX + nickname;
+
+        final UserSearchResponse cachedResponse = (UserSearchResponse) redisTemplate.opsForValue().get(redisKey);
+        if (cachedResponse != null) {
+            return cachedResponse;
+        }
+
+        final User user = userRepository.findByNickname(nickname)
+                .orElseThrow(() -> new InvalidRequestException("닉네임이 유효하지 않습니다."));
+
+        final UserSearchResponse response = UserSearchResponse.from(user.getNickname());
+        redisTemplate.opsForValue().set(redisKey, response, 10, TimeUnit.MINUTES);
+
+        return response;
+    }
 }
